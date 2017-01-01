@@ -11,9 +11,9 @@
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
                  [reagent "0.6.0"]
-                 [sablono "0.7.6"]
-                 [rum "0.10.7"]
-                 ]
+                 ;[sablono "0.7.6"]
+                 [rum "0.10.7"]]
+
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
@@ -29,13 +29,13 @@
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
                 ;; into your build
-                :figwheel {:on-jsload "bhautemplate.core/on-js-reload"
+                :figwheel {:on-jsload "bhautemplate.core/on-js-reload"}
                            ;; :open-urls will pop open your application
                            ;; in the default browser once Figwheel has
                            ;; started and complied your application.
                            ;; Comment this out once it no longer serves you.
                            ;:open-urls ["http://localhost:3449/index.html"]
-                           }
+
 
                 :compiler {:main bhautemplate.core
                            :asset-path "js/compiled/out"
@@ -59,7 +59,7 @@
              ;; :server-port 3449 ;; default
              ;; :server-ip "127.0.0.1"
 
-             :css-dirs ["resources/public/css"] ;; watch and update CSS
+             :css-dirs ["resources/public/css"]} ;; watch and update CSS
 
              ;; Start an nREPL server into the running figwheel process
              ;; :nrepl-port 7888
@@ -89,7 +89,7 @@
 
              ;; to configure a different figwheel logfile path
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
-             }
+
 
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
@@ -106,6 +106,6 @@
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
+                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}})
 
-)
+
