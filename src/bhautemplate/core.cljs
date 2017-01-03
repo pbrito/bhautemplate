@@ -73,7 +73,7 @@
                                 ;(print "ioi222zzZZZo")
                                 (put! inputA  {:action "new-todo" :msg "msssg "}))}
 
-              "Add taska"]]
+              "Add task"]]
             [:ul {:class "todo-list list-unstyled"}
              (map-indexed todo-task todo-list)]
 
@@ -81,23 +81,34 @@
 
 
 
-(def st0 {:todo-list [{:content "buy mi1111lk"} {:content "buy che1111ese"}]})
+(def st0 {:page "Home" :todo-list [{:content "buy mi1111lk"} {:content "buy che1111ese"}]})
 
 
 (def st1 (assoc {:todo-list [{:content "buy mi222lk"} {:content "buy chee222se"}]} :mode :add-todo-form))
 
-
 (go
-  (loop []
-        (rum/mount (todo-list st1 ) (.getElementById js/document "app"))
+  (loop [stat st0]
+        ;render
+        (rum/mount (todo-list stat ) (.getElementById js/document "app"))
+
+        ;state Machine
         (let [input (<! inputA)
               _action (:action input)
-              _event (:event input)]
-             (case _action
-               "Save"     (print "****Save***")
-               "new-todo" (print "***new-todo****")
-               (print _event))
-             (recur))))
+              _page   (:page   stat)]
+             (case _page
+                   "Home" (case _action
+                                "new-todo" (recur (assoc (assoc-in stat [:page] "New"):mode :add-todo-form))
+                                (recur stat)
+                                )
+                   "New" (case _action
+                              "Save"     (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
+                              "Cancel"   (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
+                              (recur stat)
+                              )
+                   (recur stat)
+                   )
+             )
+        ))
 
 
 

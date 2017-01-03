@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <style>
+#app {
+ padding: 2em;
+ background-color: #333;
+ color: #ddd;
+ min-height: 200px;
+ margin-bottom: 1.75em;
+ border-radius: 5px;
+ box-shadow: 0px 0px 5px #000 inset;
+ position: relative;
+}
+
+ a {
+  color: #fc0;
+  text-decoration: none;
+  transition: all .25s;
+   -moz-transition: all .25s;
+   -webkit-transition: all .25s;
+}
+
+ a:hover {
+  color: #fff;
+}
+
+ .modal-form {
+  background-color: #666;
+  position: absolute;
+  padding-left: 2em;
+  padding-right: 2em;
+  top: 63px;
+  left: 173px;
+  min-width: 220px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px #000;
+}
+
+@media (max-width: 480px) {
+  .example .modal-form {
+    left: 10px;
+    width: 192px;
+    min-width: 192px;
+  }
+  .example .modal-form input[type=text] {
+    width: 180px;
+  }
+  .clojure {
+    font-size: 12px;
+  }
+  .highlight pre {
+    word-break: normal;
+    word-wrap: normal;
+    overflow-x: scroll;
+  }
+  .highlight pre code {
+    white-space: pre;
+  }
+}
+
+.example a.btn {
+ color: #888;
+}
+.example h4 {
+ color: #ddd;
+}
+.example .btn {
+ margin-right: 1em;
+}
+
+.example a.btn-primary {
+ color: #fff;
+}
+
+.example li span {
+  padding-left: 10px;
+}
+.example span.completed {
+  text-decoration: line-through;
+  color: #777;
+}
+.btn{
+display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: #428bca;
+    border-color: #357ebd;
+}
+
+</style>
+  <body>
+    <div id="app">
+      <h2>Figwheel template</h2>
+      <p>Checkout your developer console.</p>
+    </div>
+    <script src="js/compiled/bhautemplate.js" type="text/javascript"></script>
+  </body>
+</html>

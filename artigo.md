@@ -38,14 +38,16 @@ Example of a action associated width a button:
                  (put! inputA {:action "Save"
                                :msg "message Save "
                                :type "Button"
-                               :event (data-from-event e) }))
-      
-I don't do :
+                               }))
+
+All actions are allways like that( ahead I will show actions can be
+generated automaticaly). Actions are identified and don't alter anything in the app.
+ For example I never do nothing like this :
         
         :on-click #(remove-todo! td)
                        
 
-Loop:
+The Loop now looks like this:
     
     (go
       (loop []
@@ -67,4 +69,53 @@ where the games stops and waits for the player input (action).
 
 ## State
 
+
+
 State and state machine
+
+
+    (go
+      (loop [stat st0]
+            ;render
+            (rum/mount (todo-list stat ) (.getElementById js/document "app"))
+        
+            ;state Machine
+            (let [input (<! inputA)
+                  _action (:action input)
+                  _page   (:page   stat)]
+                 (case _page
+                       "Home" (case _action
+                                    "new-todo" (recur (assoc (assoc-in stat [:page] "New"):mode :add-todo-form))
+                                    (recur stat)
+                                    )
+                       "New" (case _action
+                                  "Save"     (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
+                                  "Cancel"   (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
+                                  (recur stat)
+                                  )
+                       (recur stat)
+                       )
+                 )
+            ))
+            
+Lets be formal
+
+entities  page -> "Home" "New" 
+          actions -> "Save" "Cancel" "new-todo"
+          todo-list -> is a list {:content "buy milk"} 
+          
+
+
+
+drawing ....
+
+
+At this point you can trigger an action (or many) from the repl:
+(put! inputA  {:action "new-todo" :msg "msssg "})
+
+
+Generaly HTML gets mixed with "business logic" in most frameworks
+                 
+                 Selector                    action
+    (click-chan "#example1 a.new-todo"        :new-todo)
+

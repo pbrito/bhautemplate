@@ -11,7 +11,7 @@
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
                  [reagent "0.6.0"]
-                 ;[sablono "0.7.6"]
+                 [sablono "0.7.6"]
                  [rum "0.10.7"]]
 
 

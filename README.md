@@ -48,9 +48,11 @@ Aceder às variaveis
         
 outros        
         
-        ;(require '[sablono.core :as sab])
+        (require '[sablono.core :as sab])
         ;( .render js/ReactDOM  (sab/html (todo-list st1)) (.getElementById js/document "app"))
-
+        
+        (require '[cljs.core.async :as async  :refer [<! >! chan close! sliding-buffer put! alts! timeout]])
+                
 
 ## License
 
