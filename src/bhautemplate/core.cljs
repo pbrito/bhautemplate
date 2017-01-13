@@ -9,49 +9,11 @@
   (:require-macros [cljs.core.async.macros :as m :refer [go go-loop alt!]]))
 
 
-
 (enable-console-print!)
 (println "This text is printed from src/bhautemplate/core.cljs. Go ahead and edit it and see reloading in action.")
 
 
-
 (def inputA (chan))
-
-(rum/defc  modal-form [{:keys [mode task-form] :as state}]
-           (if mode
-             [:div.modal-form
-              [:h4 "Add Task"]
-              [:form.new-task-form {:on-submit (fn [e]
-                                                   (.preventDefault e)
-                                                   ;(print e)
-                                                   )}
-               [:input.form-control.new-task-name {:type        "text"
-                                                   :value       (:content task-form)
-                                                   :name        "content"
-                                                   :placeholder "New Task"}]
-               [:p
-                [:input {:type     "submit"
-                         :value    "Save"
-                         :class    "btn btn-primary"
-                         :on-click (fn [e]
-                                       (.stopPropagation e)
-                                       ;(-> e
-                                       ;    .-clientX
-                                       ;    println)
-                                       (put! inputA {:action "Save"
-                                                     :msg    "message Save "
-                                                     :type   "Button"
-                                                     :event  e}))}]
-
-                [:a {:href "#" :class "cancel-new-todo btn btn-default"
-                     :on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (put! inputA {:action "Cancel"
-                                                 :msg    "message Cancel "
-                                                 :type   "Button"
-                                                 :event  e})
-                                   )
-                     } "cancel"]]]]))
 
 
 (rum/defc  todo-task [idx {:keys [completed] :as task}]
@@ -65,48 +27,104 @@
                   (:content task)]]))
 
 
-(rum/defc  todo-list [{:keys [todo-list] :as state}]
-           [:div
-            [:p
-             [:a {:href "#" :class "new-todo btn btn-primary"
-                  :on-click (fn [e]
-                                ;(print "ioi222zzZZZo")
-                                (put! inputA  {:action "new-todo" :msg "msssg "}))}
+(def st1 {:current_Page :page_Home
+          :page_Home  [:todoList :butao2]
+          :butao2     {:type "simpleBut" :label "add new todo"  :action "new-todo" :html "btn btn-primary"}
+          :todoList   {:type "todoList" :list [:todo0 :todo1]}
+          :todo0 "buy milk"
+          :todo1 "buy cheese"
+          :page_New [:textBox1 :butao0 :butao1]
+          :textBox1 {:text "" :type "textBox" }
+          :butao0   {:type "simpleBut" :label "Save"   :action "Save"  :html "btn btn-primary"}
+          :butao1   {:type "simpleBut" :label "Cancel" :action "Cancel" :html "btn btn-primary"}
+          } )
 
-              "Add task"]]
-            [:ul {:class "todo-list list-unstyled"}
-             (map-indexed todo-task todo-list)]
+;(assoc (assoc-in st1 [:page] "New"):mode :add-todo-form)
 
-            (modal-form state)])
+(def world (atom st1))
+
+(defn newPage [i new_page modal]
+  (-> i
+      (assoc-in [:current_Page ] new_page)
+      (assoc-in [:modal ] modal))
+  )
+
+(defn buttonSimpleX [botao]
+      [:a
+       {:href     "#" :class (:html botao)
+        :on-click (fn [e]
+                      (.stopPropagation e)
+                      (put! inputA {:action (:action botao) :msg "msssg "}))}
+       (:label botao)
+       ]
+
+      )
+
+(defn lay
+      "docstring"
+      [semanticElem]
+      (case
+        (:type semanticElem)
+        "simpleBut" (buttonSimpleX  semanticElem )
+        "textBox"  [:input.form-control.new-task-name {:type        "text"
+                                                       :value       (:text semanticElem)
+                                                       :name        "content"
+                                                       :placeholder "New Task"}]
+        "todoList" (let [
+                         listTODO (map (fn [a] (hash-map  :content (a @world))) (:list semanticElem ) )
+                         ]
+                     [:ul
+                      {:class "todo-list list-unstyled"}
+                      (map-indexed todo-task listTODO )]
+                     )
+        ))
+
+(rum/defc rend [{:keys [current_Page] :as world} ]
+          (case current_Page
+
+                :page_Home (let
+                             [l           (current_Page world)
+                              pageElems (map (fn [a] (a world)) l)
+                              pl (map lay pageElems)
+                              ]
+                             [:div  pl])
+
+                :page_New  (let
+                             [l (current_Page world)
+                              ;lista ((first l) world)
+                              pageElems (map (fn [a] (a world)) l)
+                              pl (map lay pageElems)
+                              ]
+                             [:div pl])))
 
 
 
-(def st0 {:page "Home" :todo-list [{:content "buy mi1111lk"} {:content "buy che1111ese"}]})
-
-
-(def st1 (assoc {:todo-list [{:content "buy mi222lk"} {:content "buy chee222se"}]} :mode :add-todo-form))
 
 (go
-  (loop [stat st0]
-        ;render
-        (rum/mount (todo-list stat ) (.getElementById js/document "app"))
-
-        ;state Machine
+  (loop [stat [] ]
+        (rum/mount (rend @world ) (.getElementById js/document "app"))
         (let [input (<! inputA)
               _action (:action input)
-              _page   (:page   stat)]
-             (case _page
-                   "Home" (case _action
-                                "new-todo" (recur (assoc (assoc-in stat [:page] "New"):mode :add-todo-form))
-                                (recur stat)
-                                )
-                   "New" (case _action
-                              "Save"     (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
-                              "Cancel"   (recur (dissoc (assoc-in stat [:page] "Home") :mode ))
-                              (recur stat)
-                              )
-                   (recur stat)
-                   )
+              _page   (:current_Page   @world)
+              ]
+             (do
+               (case _page
+                     :page_Home(case _action
+                                     "new-todo" (do
+                                                  (swap! world newPage :page_New :mod)
+                                                  (recur stat)))
+
+                     :page_New (case _action
+                                   "Save" (do
+                                            (swap! world newPage :page_Home )
+                                            (recur stat))
+                                   "Cancel" (do
+                                              (swap! world newPage :page_Home )
+                                              (recur stat))
+                                  (recur stat)
+                                   )
+                       (recur stat)
+                       ))
              )
         ))
 

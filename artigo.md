@@ -100,18 +100,40 @@ State and state machine
             
 Lets be formal
 
-entities  page -> "Home" "New" 
-          actions -> "Save" "Cancel" "new-todo"
-          todo-list -> is a list {:content "buy milk"} 
-          
+![](resources/public/images/entity.png)
 
+|entitiyID      | Label         | Clickable | HTML       |                        |     |     |      |
+|---------------|---------------|-----------|------------|------------------------|-----|-----| -----|
+|page_Home      |"Home"         |           |            |[butao2 boxedList]      |
+|page_New       |"New"          |           |"modal-form"|[textBox,butao0,butao1] |     |     |      |
+|todo0          |"buy milk"     |"Edit"     |            |                        |     |     |      |
+|todo1          |"buy cheese"   |"Edit"     |            |                        |     |     |      |
+|butao0         |"Cancel"       |"Cancel"   |btn-primary |                        |     |     |      |
+|butao1         |"Save"         |"Save"     |btn-primary |                        |     |     |      |
+|butao2         |"new todo"     |"new-todo" |btn-primary |                        |     |     |      |
+|todoList       |               |           |            |[todo0,todo1]           |     |     |      |
+|boxedList      |"todos_Bx"     |           |            |todoList                |     |     |      |
+|textBox        |"todo text"    |           |            |                        |     |     |      |
+|current_Page   |               |           |            |page_Home               |     |    
 
+Clickable
+ actions -> "Save" "Cancel" "new-todo" "Edit"
+
+![](resources/public/images/data-flow.png)
+https://speakerdeck.com/yosriady/entity-component-systems
 
 drawing ....
 
 
 At this point you can trigger an action (or many) from the repl:
-(put! inputA  {:action "new-todo" :msg "msssg "})
+        
+        (put! inputA  {:action "new-todo" :msg "msssg "})
+
+
+## physics engine
+
+
+
 
 
 Generaly HTML gets mixed with "business logic" in most frameworks
