@@ -42,10 +42,14 @@ Example of a action associated width a button:
 
 All actions are allways like that( ahead I will show actions can be
 generated automaticaly). Actions are identified and don't alter anything in the app.
- For example I never do nothing like this :
+ For example I never do anything like this :
         
         :on-click #(remove-todo! td)
                        
+Everything is an action, so I would do instead :
+
+        :on-click # (put! inputA {:action "remove-todo" })
+
 
 The Loop now looks like this:
     
@@ -102,19 +106,18 @@ Lets be formal
 
 ![](resources/public/images/entity.png)
 
-|entitiyID      | Label         | Clickable | HTML       |                        |     |     |      |
-|---------------|---------------|-----------|------------|------------------------|-----|-----| -----|
-|page_Home      |"Home"         |           |            |[butao2 boxedList]      |
-|page_New       |"New"          |           |"modal-form"|[textBox,butao0,butao1] |     |     |      |
-|todo0          |"buy milk"     |"Edit"     |            |                        |     |     |      |
-|todo1          |"buy cheese"   |"Edit"     |            |                        |     |     |      |
-|butao0         |"Cancel"       |"Cancel"   |btn-primary |                        |     |     |      |
-|butao1         |"Save"         |"Save"     |btn-primary |                        |     |     |      |
-|butao2         |"new todo"     |"new-todo" |btn-primary |                        |     |     |      |
-|todoList       |               |           |            |[todo0,todo1]           |     |     |      |
-|boxedList      |"todos_Bx"     |           |            |todoList                |     |     |      |
-|textBox        |"todo text"    |           |            |                        |     |     |      |
-|current_Page   |               |           |            |page_Home               |     |    
+|entitiyID      | Clickable (Actions)| HTML                                                                                   |  todos                                       |  route                       |      |
+|---------------|-----------        |---------------------------------------------------------------------------------------- |----------------------------------------------|-----                         | -----|
+|page_Home      |                   |{type: "home-page"  :layout [butao2 todoList]   :label "Home"  }                         |                                              |                              |
+|page_New       |                   |{type: "modal-form" :layout [textBox,butao0,butao1] :background :page_Home :label "New"} |                                              |                              |     |
+|todo0          |"Edit"             |{type: "line-todo"  }                                                                    | {:content "buy milk"  :completed false}      |                              |                                              |              |
+|todo1          |"Edit"             |{type: "line-todo"  }                                                                    | {:content "buy cheese" :completed false}     |                              |                                              |              |
+|butao0         |"Cancel"           |{type:  "btn-primary" :label "Cancel"}                                                   |                                              |                              |
+|butao1         |"Save"             |{type: "btn-primary"  :label "Save"}                                                     |                                              |                              |
+|butao2         |"new todo"         |{type: "btn-primary"  :label "new todo"}                                                 |                                              |                              |
+|todoList       |                   |{type: "table-todo"}                                                                     |{:list [todo0,todo1] }                        |                              |
+|textBox        |"todo text"        |{type: "table-todo"}                                                                     |                                              |                              |
+|current_Page   |                   |                                                                                         |                                              | {:page :page_Home }  |                                                           |    
 
 Clickable
  actions -> "Save" "Cancel" "new-todo" "Edit"
@@ -122,10 +125,9 @@ Clickable
 ![](resources/public/images/data-flow.png)
 https://speakerdeck.com/yosriady/entity-component-systems
 
-drawing ....
+![](resources/public/images/stateMachine.png)
 
-
-At this point you can trigger an action (or many) from the repl:
+At this point you can trigger(dispatch) an action (or many) from the repl:
         
         (put! inputA  {:action "new-todo" :msg "msssg "})
 
@@ -133,7 +135,7 @@ At this point you can trigger an action (or many) from the repl:
 ## physics engine
 
 
-
+![](resources/public/images/viewHTML.png)
 
 
 Generaly HTML gets mixed with "business logic" in most frameworks
@@ -141,3 +143,13 @@ Generaly HTML gets mixed with "business logic" in most frameworks
                  Selector                    action
     (click-chan "#example1 a.new-todo"        :new-todo)
 
+
+# sumary
+usualy frameworks uses convention, you use framework you change parts in acordance to instrutions
+not knowing exatly how it works under the hood.
+
+I used concepts as rendering(html using react), event-sourcing, go-chanel,ecs and these are visible in the
+code. The advantage (in web devel) is that a team is designers , programers and buisness.
+So if the code is divided by concepts is easier to see what parts
+are important for each elements of the team and the impact it has on the other parts.
+Also is easy to replace parts, for example the rendering part for a speech interface.

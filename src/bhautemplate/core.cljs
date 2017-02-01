@@ -27,91 +27,119 @@
                   (:content task)]]))
 
 
-(def st1 {:current_Page :page_Home
-          :page_Home  [:todoList :butao2]
-          :butao2     {:type "simpleBut" :label "add new todo"  :action "new-todo" :html "btn btn-primary"}
-          :todoList   {:type "todoList" :list [:todo0 :todo1]}
-          :todo0 "buy milk"
-          :todo1 "buy cheese"
-          :page_New [:textBox1 :butao0 :butao1]
-          :textBox1 {:text "" :type "textBox" }
-          :butao0   {:type "simpleBut" :label "Save"   :action "Save"  :html "btn btn-primary"}
-          :butao1   {:type "simpleBut" :label "Cancel" :action "Cancel" :html "btn btn-primary"}
+(def st1 {:current_Page {:page :page_Home }
+          :page_Home    {:html {:type "home-page" :layout [:butao2 :todoList] :label "Home"}}
+          :page_New     {:html {:type "modal-form" :layout [:textBox1, :butao0, :butao1] :background :page_Home :label "New"}}
+          :butao2       {:action "new-todo" :html {:type "simpleBut" :label "add new todo" :class "btn btn-primary"}}
+          :todoList     {:html {:type "table-todo"} :todos {:list [:todo0 :todo1]} }
+          :todo0        {:action "Edit" :html {:type "line-todo"} :todos {:content "buy milk"   :completed false}}
+          :todo1        {:action "Edit" :html {:type "line-todo"} :todos {:content "buy cheese" :completed false}}
+          :textBox1     {:action "todo text" :html {:type "textBox" :label "todo"} :text ""}
+          :butao0       {:action "Save"      :html {:type "simpleBut" :label "Save" :class "btn btn-primary"}}
+          :butao1       {:action "Cancel"    :html {:type "simpleBut" :label "Cancel" :class "btn btn-primary"}}
           } )
-
-;(assoc (assoc-in st1 [:page] "New"):mode :add-todo-form)
 
 (def world (atom st1))
 
-(defn newPage [i new_page modal]
-  (-> i
-      (assoc-in [:current_Page ] new_page)
-      (assoc-in [:modal ] modal))
+(defn newPage [w new_page modal]
+  (-> w
+      (assoc-in [:current_Page] {:page new_page})
+      ;(assoc-in [:modal] modal)
+      )
   )
 
-(defn buttonSimpleX [botao]
-      [:a
-       {:href     "#" :class (:html botao)
-        :on-click (fn [e]
-                      (.stopPropagation e)
+(defn buttonSimpleX
+  "{:action \"new-todo\" :html {:type \"simpleBut\" :label \"add new todo\" :class \"btn btn-primary\"}}"
+  [botao]
+  [:a
+   {:href     "#" :class (:class (:html botao))
+    :on-click (fn [e] (.stopPropagation e)
                       (put! inputA {:action (:action botao) :msg "msssg "}))}
-       (:label botao)
+       (:label (:html botao))
        ]
 
       )
+(defn inputSimpleX
+  "docstring"
+  [semanticElem]
+  [:input.form-control.new-task-name {:type        "text"
+                                      :value       (:text semanticElem)
+                                      :name        "content"
+                                      :placeholder "New Task"
+                                      :on-change   (fn [e]
+
+                                                     (put! inputA {:action "Edit" :msg (.. e -target -value)})
+
+                                                     ; (print (.. e -target -value))
+                                                     )
+                                      }]
+  )
 
 (defn lay
       "docstring"
       [semanticElem]
       (case
-        (:type semanticElem)
-        "simpleBut" (buttonSimpleX  semanticElem )
-        "textBox"  [:input.form-control.new-task-name {:type        "text"
-                                                       :value       (:text semanticElem)
-                                                       :name        "content"
-                                                       :placeholder "New Task"}]
-        "todoList" (let [
-                         listTODO (map (fn [a] (hash-map  :content (a @world))) (:list semanticElem ) )
+        (:type (:html semanticElem))
+        "simpleBut"  (buttonSimpleX  semanticElem)
+        "textBox"    (inputSimpleX   semanticElem)
+        "table-todo" (let [
+                         listTODO  (map (fn [a] (a @world)) (:list (:todos semanticElem ) ) )
                          ]
-                     [:ul
-                      {:class "todo-list list-unstyled"}
-                      (map-indexed todo-task listTODO )]
+                       ; [:ul {:class "todo-list list-unstyled"} (map-indexed todo-task listTODO )]
+                       ;(map-indexed todo-task listTODO )]
+
+                       [:ul
+                        (map-indexed (fn [i a] [:li {:key i} (:content (:todos a))]) listTODO)
+                        ]
                      )
         ))
 
 (rum/defc rend [{:keys [current_Page] :as world} ]
-          (case current_Page
+          (case (:page current_Page)
 
-                :page_Home (let
-                             [l           (current_Page world)
-                              pageElems (map (fn [a] (a world)) l)
-                              pl (map lay pageElems)
-                              ]
-                             [:div  pl])
+            :page_Home (let
+                         [l   (:page_Home world)
+                          pageElems (map (fn [a] (a world)) (:layout (:html l)) )
+                          pl (map lay pageElems)
+                          ]
+                         [:div  pl])
 
-                :page_New  (let
-                             [l (current_Page world)
-                              ;lista ((first l) world)
-                              pageElems (map (fn [a] (a world)) l)
-                              pl (map lay pageElems)
-                              ]
-                             [:div pl])))
+            :page_New  (let
+                         [l          ((:page current_Page)  world)
+                          background (:background (:html l))
+                          pageElems  (map (fn [a] (a world)) (:layout (:html l)) )
+                          pl         (map lay pageElems)
+                          ]
+                         (if background
+                           (let
+                             [
+                              b2  (map (fn [a] (a world)) (:layout (:html (background world))))
+                              pl2 (map lay b2)]
+                             [:div [:div.modal-form  [:h1 "Insert"]  pl] [:div pl2]])
+
+                           [:div pl])
+
+                          )))
 
 
 
 
 (go
   (loop [stat [] ]
+    ;selciona os elem que vao ser renderizados
         (rum/mount (rend @world ) (.getElementById js/document "app"))
         (let [input (<! inputA)
               _action (:action input)
-              _page   (:current_Page   @world)
+              _msg  (:msg input)
+              _page (:page (:current_Page @world))
               ]
+
              (do
+               (print _action)
                (case _page
                      :page_Home(case _action
                                      "new-todo" (do
-                                                  (swap! world newPage :page_New :mod)
+                                                  (swap! world newPage :page_New )
                                                   (recur stat)))
 
                      :page_New (case _action
@@ -121,19 +149,14 @@
                                    "Cancel" (do
                                               (swap! world newPage :page_Home )
                                               (recur stat))
-                                  (recur stat)
-                                   )
-                       (recur stat)
-                       ))
-             )
-        ))
+                                   "Edit" (do
+                                            ;(print "mmm")
+                                            ;(print _msg)
+                                            (swap! world  assoc :textBox1 {:action "todo text",
+                                                                           :html {:type "textBox",
+                                                                                  :label "todo"},
+                                                                           :text _msg} )
 
-
-
-;(rum/mount (todo-list st1 ) (.getElementById js/document "app") )
-
-;( .render js/ReactDOM  (sab/html (todo-list st1)) (.getElementById js/document "app"))
-
-
-(defn on-js-reload [])
-
+                                            (recur stat))
+                                  (recur stat))
+                     (recur stat))))))
