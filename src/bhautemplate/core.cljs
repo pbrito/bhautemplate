@@ -34,7 +34,7 @@
           :todoList     {:html {:type "table-todo"} :todos {:list [:todo0 :todo1]} }
           :todo0        {:action "Edit" :html {:type "line-todo"} :todos {:content "buy milk"   :completed false}}
           :todo1        {:action "Edit" :html {:type "line-todo"} :todos {:content "buy cheese" :completed false}}
-          :textBox1     {:action "todo text" :html {:type "textBox" :label "todo"} :text ""}
+          :textBox1     {:action "todo text" :html {:type "textBox" :label "todo"} :text "" :validation {:max-size 9 }}
           :butao0       {:action "Save"      :html {:type "simpleBut" :label "Save" :class "btn btn-primary"}}
           :butao1       {:action "Cancel"    :html {:type "simpleBut" :label "Cancel" :class "btn btn-primary"}}
           } )
@@ -83,13 +83,33 @@
         "simpleBut"  (buttonSimpleX  semanticElem)
         "textBox"    (inputSimpleX   semanticElem)
         "table-todo" (let [
-                         listTODO  (map (fn [a] (a @world)) (:list (:todos semanticElem ) ) )
-                         ]
-                       ; [:ul {:class "todo-list list-unstyled"} (map-indexed todo-task listTODO )]
-                       ;(map-indexed todo-task listTODO )]
+                           listTODO  (map (fn [a] (a @world)) (:list (:todos semanticElem ) ) )
+                           listTODO2 (map (fn [a] {a  (a @world) }) (:list (:todos semanticElem ) ) )
+                           listTODO3 (into {} listTODO2)
+                           _ids (keys listTODO3)
+                           ]
 
-                       [:ul
-                        (map-indexed (fn [i a] [:li {:key i} (:content (:todos a))]) listTODO)
+                       [:ul {:class "list-unstyled"}
+                        (map-indexed (fn [i a]
+                                       (let [b (a @world)
+                                             _text (:content (:todos b))
+                                             _completed (:completed (:todos b))
+                                             ]
+                                         (print "b")
+                                         (print b)
+                                         [:li {
+                                               :key i
+                                               :on-click (fn [e]
+                                                           (put! inputA {:action "Select"
+                                                                         :msg a }))
+
+                                               }
+                                          [:span {:class (if _completed "glyphicon glyphicon-ok-circle" "glyphicon glyphicon-ok-sign")}]
+                                          [:span {:style (if _completed {:text-decoration "line-through"
+                                                                         :color           "#777"})
+                                                  } _text ]
+                                          ])) _ids
+                                     )
                         ]
                      )
         ))
@@ -114,10 +134,11 @@
                            (let
                              [
                               b2  (map (fn [a] (a world)) (:layout (:html (background world))))
-                              pl2 (map lay b2)]
-                             [:div [:div.modal-form  [:h1 "Insert"]  pl] [:div pl2]])
+                              pl2 (map lay b2)] [:div [:div.modal-form  [:h1 "Insert"]  pl] [:div pl2]])
 
-                           [:div pl])
+                           [:div pl]
+
+                           )
 
                           )))
 
@@ -126,37 +147,51 @@
 
 (go
   (loop [stat [] ]
-    ;selciona os elem que vao ser renderizados
-        (rum/mount (rend @world ) (.getElementById js/document "app"))
-        (let [input (<! inputA)
-              _action (:action input)
-              _msg  (:msg input)
-              _page (:page (:current_Page @world))
-              ]
+    ;validation
+    (rum/mount (rend @world ) (.getElementById js/document "app"))
+    (let [input (<! inputA)
+          _action (:action input)
+          _msg  (:msg input)
+          _page (:page (:current_Page @world))]
+      (do
+        (print _action)
+        (case _page
+          :page_Home(case _action
+                      "new-todo" (do
+                                   (swap! world newPage :page_New )
+                                   (recur stat))
+                      "Select" (do
+                                 ;(print "select" _msg)
+                                 (swap! world update-in  [_msg :todos :completed ]  #(-> true) )
+                                 (recur stat))
+                      (recur stat))
 
-             (do
-               (print _action)
-               (case _page
-                     :page_Home(case _action
-                                     "new-todo" (do
-                                                  (swap! world newPage :page_New )
-                                                  (recur stat)))
+          :page_New (case _action
+                      "Save" (let [
+                                   _todo_textBox  (:text (:textBox1 @world))
+                                    _number_of_todos (count (:list (:todos (:todoList @world))))
+                                    _new_todo_id (keyword (clojure.string/join ["todo"  _number_of_todos]) )
+                                   ]
+                               (do
+                                 (swap! world assoc _new_todo_id {:action "Edit"
+                                                             :html   {:type "line-todo"}
+                                                             :todos  {:content  _todo_textBox :completed false}}) ;creates a new todo
+                                 (swap! world update-in [:todoList :todos :list] conj _new_todo_id) ;adds the todo to the list
+                                 (swap! world newPage :page_Home)
+                                 (swap! world  assoc :textBox1 {:action "todo text", :html {:type "textBox", :label "todo"}, :text ""} )
+                                 (recur stat)))
 
-                     :page_New (case _action
-                                   "Save" (do
-                                            (swap! world newPage :page_Home )
-                                            (recur stat))
-                                   "Cancel" (do
+                      "Cancel" (do
                                               (swap! world newPage :page_Home )
                                               (recur stat))
-                                   "Edit" (do
+                      "Edit" (do
+
                                             ;(print "mmm")
                                             ;(print _msg)
-                                            (swap! world  assoc :textBox1 {:action "todo text",
-                                                                           :html {:type "textBox",
-                                                                                  :label "todo"},
-                                                                           :text _msg} )
-
-                                            (recur stat))
-                                  (recur stat))
-                     (recur stat))))))
+                               (swap! world  assoc :textBox1 {:action "todo text",
+                                                              :html {:type "textBox",
+                                                                     :label "todo"},
+                                                              :text _msg})
+                               (recur stat))
+                      (recur stat))
+          (recur stat))))))

@@ -138,7 +138,8 @@ At this point you can trigger(dispatch) an action (or many) from the repl:
 ![](resources/public/images/viewHTML.png)
 
 
-Generaly HTML gets mixed with "business logic" in most frameworks
+Generaly HTML gets mixed with "business logic" in most frameworks in some way.
+    If we transform rendering into a system, then all it does is goes through all the entitys and renders the current state.
                  
                  Selector                    action
     (click-chan "#example1 a.new-todo"        :new-todo)
