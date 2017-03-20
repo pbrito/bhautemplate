@@ -49,12 +49,12 @@
   )
 
 (defn buttonSimpleX
-  "{:action \"new-todo\" :html {:type \"simpleBut\" :label \"add new todo\" :class \"btn btn-primary\"}}"
-  [botao]
+  "botao -> {:action \"new-todo\" :html {:type \"simpleBut\" :label \"add new todo\" :class \"btn btn-primary\"}}"
+  [botao ]
   [:a
    {:href     "#" :class (:class (:html botao))
     :on-click (fn [e] (.stopPropagation e)
-                      (put! inputA {:action (:action botao) :msg "msssg "}))}
+                      (put! inputA {:action "new-todo" :msg "msssg "}))}
        (:label (:html botao))
        ]
 
