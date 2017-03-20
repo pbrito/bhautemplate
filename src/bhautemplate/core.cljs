@@ -54,7 +54,7 @@
   [:a
    {:href     "#" :class (:class (:html botao))
     :on-click (fn [e] (.stopPropagation e)
-                      (put! inputA {:action "new-todo" :msg "msssg "}))}
+                      (put! inputA {:action (:action botao) :msg "msssg "}))}
        (:label (:html botao))
        ]
 
@@ -154,6 +154,7 @@
           _msg  (:msg input)
           _page (:page (:current_Page @world))]
       (do
+        (print "action")
         (print _action)
         (case _page
           :page_Home(case _action
